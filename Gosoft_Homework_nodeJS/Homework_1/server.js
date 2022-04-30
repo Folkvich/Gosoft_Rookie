@@ -6,7 +6,7 @@ const text = Date();
 const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
-    res.end('Vichaya Wuttivichayanan\n' + text );
+    res.end('Vichaya Wuttivichayanan\n' + "" + text );
   });
 
   server.listen(port, hostname, () => {
