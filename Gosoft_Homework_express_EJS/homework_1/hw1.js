@@ -13,10 +13,10 @@ app.get('/', (req, res) => {
     if (!num19.exec(req.query.n1) || !num19.exec(req.query.n2) || !num19.exec(req.query.n3) || !num19.exec(req.query.n4)) return res.status(403).send("err regex");
   
 
-    const n1 = parseInt(req.query.n1); //แปรงเลขที่เอาไปคำนวนได้
-    const n2 = parseInt(req.query.n2); //แปรงเลขที่เอาไปคำนวนได้
-    const n3 = parseInt(req.query.n3); //แปรงเลขที่เอาไปคำนวนได้
-    const n4 = parseInt(req.query.n4); //แปรงเลขที่เอาไปคำนวนได้
+    const n1 = parseInt(req.query.n1); 
+    const n2 = parseInt(req.query.n2); 
+    const n3 = parseInt(req.query.n3); 
+    const n4 = parseInt(req.query.n4); 
 
     const game24solver = require('24game-solver/dist/24game-solver');
     const result = game24solver([n1, n2, n3, n4], 24);
