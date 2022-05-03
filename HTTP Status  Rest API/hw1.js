@@ -7,7 +7,7 @@ let employee = []
 //การดึงข้อมูล
 app.get('/getEmployee', (req, res) => {
     res.status(200).send({
-        data: employee 
+        data: employee
     })
 })
 
