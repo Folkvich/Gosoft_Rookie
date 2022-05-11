@@ -39,6 +39,11 @@ app.post('/login', (req, res) => {
     }
 })
 
+app.get('/logout', (req, res) => {
+    res.cookie('token', "")
+    res.redirect('/')
+})
+
 app.listen(port, () => {
     console.log(`Listening at http://localhost:${port}`);
 });
