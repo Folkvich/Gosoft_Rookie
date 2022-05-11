@@ -16,10 +16,6 @@ const sqlpool = mysql.createPool({
 
 })
 
-// sqlpool.query('select * from employee', (err, result) => {
-//     console.log(err, result);
-// })
-
 const app = express();
 app.use(express.json());
 
