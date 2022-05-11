@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: dimgrey;">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+
+<body>
+    <div style="color: blue; font-size: 50px; font-family: Verdana, Geneva, Tahoma, sans-serif;">
+        <a href="/home" style="color: #000000;">HOME</a>
+        <br>
+    </div>
+
+    <h1 style="text-align: center; font-size: 50px; font-family: Verdana, Geneva, Tahoma, sans-serif;">Login</h1>
+
+    <div class="center" style="background-color: rgb(5, 35, 136);">
+        <form action="/login" method="post">
+            <p class="input-label"
+                style="font-size: 40px; font-family: Verdana, Geneva, Tahoma, sans-serif; color: aliceblue;">Username
+            </p>
+            <input type="text" placeholder="กรุณากรอก user" name="user" style="font-size: 30px; border-radius: 10px;">
+            <p class="input-label"
+                style="font-size: 40px; font-family: Verdana, Geneva, Tahoma, sans-serif; color: aliceblue; ">Password
+            </p>
+            <input type="password" placeholder="กรุณากรอก pass" name="pass"
+                style="font-size: 30px; border-radius: 10px;">
+            <br>
+            <br>
+            <input type="submit" value="Login"
+                style="font-size: 30px; margin-bottom: 10px; font-family: Verdana, Geneva, Tahoma, sans-serif; border-radius: 10px;">
+        </form>
+    </div>
+</body>
+<style>
+    .input-label {
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+
+    .center {
+        border: 5px solid #000000;
+        text-align: center;
+    }
+</style>
+
+</html>
