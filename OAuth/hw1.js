@@ -121,30 +121,6 @@ app.delete('/delEmployee', (req, response) => {
     })
 })
 
-//การล็อคอิน
-app.post('/login', (req, response) => {
-    if (req.body.user == "admin" && req.body.pass == "12345") {
-        const token = jwt.sign({ username: "admin" }, jwtsecret)
-        return response.json({ token })
-    }
-    return response.status(400).send("error invalid data");
-})
-
-app.use((req, response, next) => {
-    if (req.path == "/login") return next()
-
-    const authheader = req.headers.authorization
-
-    if (!authheader) return response.json({ msg: "error unauthorize" })
-
-    jwt.verify(authheader.split(' ')[1], jwtsecret, (err, result) => {
-        if (err) {
-            return response.json({ msg: "error unauthorize" })
-        }
-        next()
-    })
-})
-
 app.listen(3000, () => {
     console.log('Listening on port: 3000');
 });
