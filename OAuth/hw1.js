@@ -23,13 +23,36 @@ const sqlpool = mysql.createPool({
 const app = express();
 app.use(express.json());
 
-let employee = []
+app.use((req, response, next) => {
+    if (req.path == "/login") return next()
+
+    const authheader = req.headers.authorization
+
+    if (!authheader) return response.json({ msg: "error unauthorize" })
+
+    jwt.verify(authheader.split(' ')[1], jwtsecret, (err, result) => {
+        if (err) {
+            return response.json({ msg: "error unauthorize" })
+        }
+        next()
+    })
+})
+
+//การล็อคอิน
+app.post('/login', (req, response) => {
+    if (req.body.user == "admin" && req.body.pass == "12345") {
+        const token = jwt.sign({ username: "admin" }, jwtsecret)
+        return response.json({ token })
+    }
+    return response.status(400).send("error invalid data");
+})
+
 
 //การดึงข้อมูลพนักงาน
 app.get('/getEmployee', (req, response) => {
     const sql = 'select * from employee'
     sqlpool.query(sql, (err, result) => {
-        if(err) {
+        if (err) {
             return response.status(400).json(err)
         }
         return response.json({ data: result })
@@ -60,9 +83,9 @@ app.post('/createEmployee', (req, response) => {
 
 //การแก้ไขข้อมูลพนักงาน
 app.put('/updateEmployee', (req, response) => {
-    if(
+    if (
         !req.body.id || !req.body.position || !req.body.tel || !req.body.email
-        ) {
+    ) {
         return response.status(400).send("error invalid data");
     }
 
@@ -73,10 +96,10 @@ app.put('/updateEmployee', (req, response) => {
         tel: req.body.tel,
         email: req.body.email
     }, (err, result) => {
-        if(err) {
+        if (err) {
             return response.status(400).json(err)
         }
-        if(result.affectedRows == 0) return response.status(400).json({data: "Employee not found"})
+        if (result.affectedRows == 0) return response.status(400).json({ data: "Employee not found" })
         return response.json({ data: "ok" })
     })
 })
@@ -90,10 +113,10 @@ app.delete('/delEmployee', (req, response) => {
     sqlpool.query(sql, {
         id: req.body.id
     }, (err, result) => {
-        if(err) {
+        if (err) {
             return response.status(400).json(err)
         }
-        if(result.affectedRows == 0) return response.status(400).json({data: "Employee not found"})
+        if (result.affectedRows == 0) return response.status(400).json({ data: "Employee not found" })
         return response.json({ data: "ok" })
     })
 })
@@ -102,21 +125,21 @@ app.delete('/delEmployee', (req, response) => {
 app.post('/login', (req, response) => {
     if (req.body.user == "admin" && req.body.pass == "12345") {
         const token = jwt.sign({ username: "admin" }, jwtsecret)
-        return response.json({token})
+        return response.json({ token })
     }
     return response.status(400).send("error invalid data");
 })
 
-app.use((req, response, next)=>{
-    if(req.path == "/login") return next()
+app.use((req, response, next) => {
+    if (req.path == "/login") return next()
 
     const authheader = req.headers.authorization
 
-    if(!authheader) return response.json({msg: "error unauthorize"})
+    if (!authheader) return response.json({ msg: "error unauthorize" })
 
     jwt.verify(authheader.split(' ')[1], jwtsecret, (err, result) => {
         if (err) {
-            return response.json({msg: "error unauthorize"})
+            return response.json({ msg: "error unauthorize" })
         }
         next()
     })
