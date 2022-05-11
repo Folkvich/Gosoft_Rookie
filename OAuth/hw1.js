@@ -1,6 +1,9 @@
 const { response } = require('express');
 const express = require('express');
 const mysql = require('mysql2')
+const jwt = require('jsonwebtoken')
+const jwtsecret = "howdeepisyourlove"
+
 const sqlpool = mysql.createPool({
 
     namedPlaceholders: true,
@@ -13,87 +16,110 @@ const sqlpool = mysql.createPool({
 
 })
 
-sqlpool.query('select * from employee', (err, result) => {
-    console.log(err, result);
-})
+// sqlpool.query('select * from employee', (err, result) => {
+//     console.log(err, result);
+// })
 
 const app = express();
 app.use(express.json());
 
 let employee = []
 
-//การดึงข้อมูล
-app.get('/getEmployee', (req, res) => {
-    sqlpool.query('select * from employee', (err, result) => {
-        if(err){
-            return response.status(400).json({err})
+//การดึงข้อมูลพนักงาน
+app.get('/getEmployee', (req, response) => {
+    const sql = 'select * from employee'
+    sqlpool.query(sql, (err, result) => {
+        if(err) {
+            return response.status(400).json(err)
         }
-        //console.log(err, result);
-            return response.json({result})
+        return response.json({ data: result })
     })
 })
 
-//การเพิ่มข้อมูล
-app.post('/addEmployee', (req, res) => {
+
+//การเพิ่มข้อมูลพนักงาน
+app.post('/createEmployee', (req, response) => {
     if (!req.body.firstName || !req.body.lastName || !req.body.id || !req.body.position || !req.body.tel || !req.body.email) {
-        return res.status(400).send({ message: "ผิดพลาด" })
+        return response.status(400).send({ message: "error invalid data" })
     }
-
-    for (let i = 0; i < employee.length; i++) {
-        if (employee[i].id == req.body.id || employee[i].tel == req.body.tel || employee[i].email == req.body.email) {
-            return res.status(400).send({ message: "Error: ข้อมูลพนักงานซ้ำ" })
-        }
-    }
-
-    const newData = {
+    const sql = 'insert into employee value (:firstName, :lastName, :id, :position, :tel, :email)'
+    sqlpool.query(sql, {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         id: req.body.id,
         position: req.body.position,
         tel: req.body.tel,
         email: req.body.email
-    };
-
-    employee.push(newData)
-    res.status(200).send({ message: "สำเร็จ" })
-})
-
-//การแก้ไขข้อมูล
-app.put('/editEmployee', (req, res) => {
-    if (
-        !req.body.id ||
-        (
-            !req.body.pos && !req.body.tel && !req.body.email
-        )
-    ) {
-        return res.status(400).send({ message: "ผิดพลาด" })
-    }
-
-    for (let i = 0; i < employee.length; i++) {
-        if (employee[i].id == req.body.id) {
-
-            if (req.body.position) employee[i].position = req.body.position
-            if (req.body.tel) employee[i].tel = req.body.tel
-            if (req.body.email) employee[i].email = req.body.email
-
-            return res.status(200).send({ message: "สำเร็จ" })
+    }, (err, result) => {
+        if (err) {
+            return response.status(400).json(err)
         }
-    }
-    return res.status(400).send({ message: "Error: หาข้อมูลพนักงานที่จะแก้ไม่เจอ" })
+        return response.json({ data: "ok" })
+    })
 })
 
-//การลบข้อมูล
-app.delete('/delEmployee', (req, res) => {
+//การแก้ไขข้อมูลพนักงาน
+app.put('/updateEmployee', (req, response) => {
+    if(
+        !req.body.id || !req.body.position || !req.body.tel || !req.body.email
+        ) {
+        return response.status(400).send("error invalid data");
+    }
+
+    const sql = 'update employee set position = :position, tel = :tel, email = :email where id = :id'
+    sqlpool.query(sql, {
+        id: req.body.id,
+        position: req.body.position,
+        tel: req.body.tel,
+        email: req.body.email
+    }, (err, result) => {
+        if(err) {
+            return response.status(400).json(err)
+        }
+        if(result.affectedRows == 0) return response.status(400).json({data: "Employee not found"})
+        return response.json({ data: "ok" })
+    })
+})
+
+//การลบข้อมูลพนักงาน
+app.delete('/delEmployee', (req, response) => {
     if (!req.body.id) {
-        return res.status(400).send({ message: "ผิดพลาด" })
+        return response.status(400).send({ message: "error invalid data" })
     }
-    for (let i = 0; i < employee.length; i++) {
-        if (employee[i].id == req.body.id) {
-            employee.splice(i, 1);
-            return res.status(200).send({ message: "สำเร็จ" })
+    const sql = 'delete from employee where id = :id'
+    sqlpool.query(sql, {
+        id: req.body.id
+    }, (err, result) => {
+        if(err) {
+            return response.status(400).json(err)
         }
+        if(result.affectedRows == 0) return response.status(400).json({data: "Employee not found"})
+        return response.json({ data: "ok" })
+    })
+})
+
+//การล็อคอิน
+app.post('/login', (req, response) => {
+    if (req.body.user == "admin" && req.body.pass == "12345") {
+        const token = jwt.sign({ username: "admin" }, jwtsecret)
+        return response.json({token})
     }
-    return res.status(400).send({ message: "Error: ไม่เจอ ID ที่ต้องการลบ" })
+    return response.status(400).send("error invalid data");
+})
+
+app.use((req, response, next)=>{
+    if(req.path == "/login") return next()
+
+    const authheader = req.headers.authorization
+
+    if(!authheader) return response.json({msg: "error unauthorize"})
+
+    jwt.verify(authheader.split(' ')[1], jwtsecret, (err, result) => {
+        if (err) {
+            return response.json({msg: "error unauthorize"})
+        }
+        next()
+    })
 })
 
 app.listen(3000, () => {
